@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Kanban Board - farex963-ui/test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-box .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50 0%, #45a049 100%);
+            width: 0%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: width 0.3s ease;
+        }
+
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .column {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            min-height: 600px;
+        }
+
+        .column-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid;
+        }
+
+        .column-header.todo {
+            border-bottom-color: #f44336;
+            color: #f44336;
+        }
+
+        .column-header.in-progress {
+            border-bottom-color: #ff9800;
+            color: #ff9800;
+        }
+
+        .column-header.done {
+            border-bottom-color: #4CAF50;
+            color: #4CAF50;
+        }
+
+        .column-header h2 {
+            font-size: 1.3em;
+            flex: 1;
+        }
+
+        .column-header .count {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .card {
+            background: #f5f5f5;
+            border-left: 4px solid;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            cursor: move;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .card.todo {
+            border-left-color: #f44336;
+        }
+
+        .card.in-progress {
+            border-left-color: #ff9800;
+        }
+
+        .card.done {
+            border-left-color: #4CAF50;
+        }
+
+        .card-number {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .card-title {
+            font-size: 1em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .card-link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.85em;
+        }
+
+        .card-link:hover {
+            text-decoration: underline;
+        }
+
+        .card-date {
+            font-size: 0.8em;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        .droppable {
+            min-height: 500px;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .droppable.drag-over {
+            background-color: #e3f2fd;
+        }
+
+        .footer {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: #666;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 1200px) {
+            .kanban-board {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .legend {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .legend h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .legend-items {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+
+        .legend-color.todo {
+            background: #f44336;
+        }
+
+        .legend-color.in-progress {
+            background: #ff9800;
+        }
+
+        .legend-color.done {
+            background: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎯 Kanban Board Interactive</h1>
+            <p>📍 Repository: <strong>farex963-ui/test</strong></p>
+            
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="number" id="total-count">9</div>
+                    <div class="label">Total Issues</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="todo-count">9</div>
+                    <div class="label">À Faire</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="in-progress-count">0</div>
+                    <div class="label">En Cours</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="done-count">0</div>
+                    <div class="label">Complété</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <p style="font-size: 0.9em; color: #999; margin-bottom: 10px;">Progression du projet</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%">
+                        <span id="progress-text">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <h3>📋 Légende des colonnes</h3>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-color todo"></div>
+                    <span><strong>À Faire (To Do)</strong> - Tâches en attente</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color in-progress"></div>
+                    <span><strong>En Cours (In Progress)</strong> - Tâches en cours</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color done"></div>
+                    <span><strong>Complété (Done)</strong> - Tâches terminées</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kanban Board -->
+        <div class="kanban-board">
+            <!-- To Do Column -->
+            <div class="column">
+                <div class="column-header todo">
+                    <h2>📌 À Faire</h2>
+                    <div class="count" id="todo-header-count">9</div>
+                </div>
+                <div class="droppable" id="todo-column" ondrop="allowDrop(event)" ondragover="dragOver(event)" ondragleave="dragLeave(event)">
+                    <div class="card todo" draggable="true" ondragstart="dragStart(event)" data-issue="1">
+                        <div class="card-number">#1</div>
+                        <div class="card-title">Write API documentation</div>
+                        <a href="https://github.com/farex963-ui/test/issues/1" class="card-link" target="_blank">Voir l'issue →</a>
+                        <div class="card-date">Créé: 2026-06-08</div>
+                    </div>
+                    <div class="card todo" draggable="true" ondragstart="dragStart(event)" data-issue="2">
+                        <div class="card-number">#2</div>
+                        <div class="card-title">EPIC001</div>
+                        <a href="https://github.com/farex963-ui/test/issues/2" class="card-link" target="_blank">Voir l'issue →</a>
+                        <div class="card-date">Créé: 2026-06-10</div>
+                    </div>
+                    <div class="card todo" draggable="true" ondragstart="dragStart(event)" data-issue="3">
+                        <div class="card-number">#3</div>
+                        <div class="card-title">EPIC00A</div>
+                        <a href="https://github.com/farex963-ui/test/issues/3" class="card-link" target="_blank">Voir l'issue →</a>
+                        <div class="card-date">Créé: 2026-06-10</div>
+                    </div>
+                    <div class="card todo" draggable="true" ondragstart="dragStart(event)" data-issue="4">
+                        <div class="card-number">#4</div>
+                        <div class="card-title">EPIC002</div>
+                        <a href="https://github.com/farex963-ui/test/issues/4" class="card-link" target="_blank">Voir l'issue →</a>
+                        <div class="card-date">Créé: 2026-06-10</div>
+                    </div>
+                    <div class="card todo" draggable="true" ondragstart="dragStart(event)" data-issue="5">
+                        <div class="card-number">#5</div>
+                        <div class="card-title">ECPIC003</div>
+                        <a href="https://github.com/farex963-ui/test/issues/5" class="card-link" target="_blank">Voir l'issue →</a>
+                        <div class="card-date">Créé: 2026-06-10</div>
+                    </div>
+                    <div class="card todo" draggable="true" ondragstart="dragStart(event)" data-issue="6">
+                        <div class="card-number">#6</div>
+                        <div class="card-title">ECPIC004</div>
+                        <a href="https://github.com/farex963-ui/test/issues/6" class="card-link" target="_blank">Voir l'issue →</a>
+                        <div class="card-date">Créé: 2026-06-10</div>
+                    </div>
+                    <div class="card todo" draggable="true" ondragstart="dragStart(event)" data-issue="7">
+                        <div class="card-number">#7</div>
+                        <div class="card-title">ECPIC005</div>
+                        <a href="https://github.com/farex963-ui/test/issues/7" class="card-link" target="_blank">Voir l'issue →</a>
+                        <div class="card-date">Créé: 2026-06-10</div>
+                    </div>
+                    <div class="card todo" draggable="true" ondragstart="dragStart(event)" data-issue="8">
+                        <div class="card-number">#8</div>
+                        <div class="card-title">ECPIC006</div>
+                        <a href="https://github.com/farex963-ui/test/issues/8" class="card-link" target="_blank">Voir l'issue →</a>
+                        <div class="card-date">Créé: 2026-06-10</div>
+                    </div>
+                    <div class="card todo" draggable="true" ondragstart="dragStart(event)" data-issue="9">
+                        <div class="card-number">#9</div>
+                        <div class="card-title">ECPIC007</div>
+                        <a href="https://github.com/farex963-ui/test/issues/9" class="card-link" target="_blank">Voir l'issue →</a>
+                        <div class="card-date">Créé: 2026-06-10</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- In Progress Column -->
+            <div class="column">
+                <div class="column-header in-progress">
+                    <h2>⚙️ En Cours</h2>
+                    <div class="count" id="in-progress-header-count">0</div>
+                </div>
+                <div class="droppable" id="in-progress-column" ondrop="allowDrop(event)" ondragover="dragOver(event)" ondragleave="dragLeave(event)">
+                </div>
+            </div>
+
+            <!-- Done Column -->
+            <div class="column">
+                <div class="column-header done">
+                    <h2>✅ Complété</h2>
+                    <div class="count" id="done-header-count">0</div>
+                </div>
+                <div class="droppable" id="done-column" ondrop="allowDrop(event)" ondragover="dragOver(event)" ondragleave="dragLeave(event)">
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>💡 <strong>Conseil:</strong> Glissez et déposez les cartes entre les colonnes pour mettre à jour l'état des tâches</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">
+                Repository: <a href="https://github.com/farex963-ui/test" target="_blank">farex963-ui/test</a> | 
+                <a href="https://github.com/farex963-ui/test/projects" target="_blank">Voir le projet sur GitHub</a>
+            </p>
+            <p style="margin-top: 15px; color: #999; font-size: 0.85em;">Dernière mise à jour: 2026-06-10</p>
+        </div>
+    </div>
+
+    <script>
+        let draggedElement = null;
+
+        function dragStart(event) {
+            draggedElement = event.target.closest('.card');
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/html', draggedElement.innerHTML);
+        }
+
+        function dragOver(event) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+            const droppable = event.currentTarget;
+            droppable.classList.add('drag-over');
+        }
+
+        function dragLeave(event) {
+            if (event.currentTarget === event.target) {
+                event.currentTarget.classList.remove('drag-over');
+            }
+        }
+
+        function allowDrop(event) {
+            event.preventDefault();
+            const droppable = event.currentTarget;
+            droppable.classList.remove('drag-over');
+            
+            if (draggedElement) {
+                const oldParent = draggedElement.parentElement;
+                const newParent = droppable;
+                
+                // Determine the new status
+                let newStatus = '';
+                if (newParent.id === 'todo-column') {
+                    newStatus = 'todo';
+                } else if (newParent.id === 'in-progress-column') {
+                    newStatus = 'in-progress';
+                } else if (newParent.id === 'done-column') {
+                    newStatus = 'done';
+                }
+                
+                // Update card class
+                draggedElement.classList.remove('todo', 'in-progress', 'done');
+                draggedElement.classList.add(newStatus);
+                
+                // Move the card
+                newParent.appendChild(draggedElement);
+                
+                // Update counts
+                updateCounts();
+                draggedElement = null;
+            }
+        }
+
+        function updateCounts() {
+            const todoCards = document.querySelectorAll('#todo-column .card').length;
+            const inProgressCards = document.querySelectorAll('#in-progress-column .card').length;
+            const doneCards = document.querySelectorAll('#done-column .card').length;
+            const totalCards = todoCards + inProgressCards + doneCards;
+
+            // Update stat boxes
+            document.getElementById('total-count').textContent = totalCards;
+            document.getElementById('todo-count').textContent = todoCards;
+            document.getElementById('in-progress-count').textContent = inProgressCards;
+            document.getElementById('done-count').textContent = doneCards;
+
+            // Update header counts
+            document.getElementById('todo-header-count').textContent = todoCards;
+            document.getElementById('in-progress-header-count').textContent = inProgressCards;
+            document.getElementById('done-header-count').textContent = doneCards;
+
+            // Update progress bar
+            const completionPercentage = totalCards > 0 ? Math.round((doneCards / totalCards) * 100) : 0;
+            const progressFill = document.getElementById('progress-fill');
+            progressFill.style.width = completionPercentage + '%';
+            document.getElementById('progress-text').textContent = completionPercentage + '%';
+        }
+
+        // Initialize counts on page load
+        window.addEventListener('load', updateCounts);
+    </script>
+</body>
+</html>
